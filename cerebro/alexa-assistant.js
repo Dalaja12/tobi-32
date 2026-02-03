@@ -1,18 +1,18 @@
-// CyberPet Voice Final - Asistente por voz con imágenes
-class CyberPetVoice {
+// Alexa Botón Final - Con imágenes y voz mexicana
+class AlexaButton {
     constructor() {
         this.isActive = false;
         this.isSpeaking = false;
         this.recognition = null;
-        this.wakeWord = "cyberpet"; // CAMBIADO DE "alexa" A "cyberpet"
-        this.button = document.getElementById('alexaBtn'); // El botón sigue llamándose alexaBtn por compatibilidad
+        this.wakeWord = "alexa";
+        this.button = document.getElementById('alexaBtn');
         
         // Imágenes para los estados del botón
         this.buttonImages = {
-            inactive: 'img/robot.png',    // 🤖 (desactivado)
-            listening: 'img/microfono.png',    // 🎤 (escuchando)
-            speaking: 'img/globo-de-chat.png',  // 🗣️ (hablando)
-            thinking: 'img/idea.png'   // 🤔 (pensando)
+            inactive: 'img/alexa-off.png',    // 🤖 (desactivado)
+            listening: 'img/alexa-on.png',    // 🎤 (escuchando)
+            speaking: 'img/alexa-speak.png',  // 🗣️ (hablando)
+            thinking: 'img/alexa-think.png'   // 🤔 (pensando)
         };
         
         // Inicializar
@@ -20,12 +20,7 @@ class CyberPetVoice {
     }
     
     initialize() {
-        console.log('🎯 CyberPet Voice inicializando...');
-        
-        // Actualizar título del botón
-        if (this.button) {
-            this.button.title = 'Modo CyberPet - Asistente por voz';
-        }
+        console.log('🎯 Alexa Botón Final inicializando...');
         
         // Configurar el botón con imagen inicial
         if (this.button) {
@@ -33,15 +28,15 @@ class CyberPetVoice {
             this.button.innerHTML = '';
             const img = document.createElement('img');
             img.src = this.buttonImages.inactive;
-            img.alt = 'CyberPet';
+            img.alt = 'Alexa';
             img.style.width = '32px';
             img.style.height = '32px';
             this.button.appendChild(img);
             
             this.button.addEventListener('click', () => this.toggleMicrophone());
-            console.log('✅ Botón CyberPet configurado');
+            console.log('✅ Botón configurado con imágenes');
         } else {
-            console.error('❌ Botón CyberPet no encontrado');
+            console.error('❌ Botón Alexa no encontrado');
             return;
         }
         
@@ -80,18 +75,13 @@ class CyberPetVoice {
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
             console.log('👂 Escuché:', transcript);
             
-            // Buscar "cyberpet" en lo que dijo (ACEPTA VARIACIONES)
-            const hasWakeWord = transcript.includes('cyberpet') || 
-                               transcript.includes('cyber pet') ||
-                               transcript.includes('saíberpet') || // Para acento español
-                               transcript.includes('saiberpet');
-            
-            if (hasWakeWord) {
-                console.log('✅ "CyberPet" detectado');
+            // Buscar "alexa" en lo que dijo
+            if (transcript.includes(this.wakeWord)) {
+                console.log('✅ "Alexa" detectada');
                 this.processCommand(transcript);
             } else {
-                // Si no dijo "cyberpet", ignorar
-                console.log('❌ No dijo "CyberPet"');
+                // Si no dijo "alexa", ignorar
+                console.log('❌ No dijo "Alexa"');
                 this.resetToListening();
             }
         };
@@ -103,7 +93,7 @@ class CyberPetVoice {
             if (event.error === 'not-allowed') {
                 this.showMessage('🎤 Permitir micrófono');
                 setTimeout(() => {
-                    alert('Por favor, permite el acceso al micrófono para usar CyberPet.');
+                    alert('Por favor, permite el acceso al micrófono para usar Alexa.');
                 }, 500);
             }
             
@@ -124,7 +114,7 @@ class CyberPetVoice {
             }
         };
         
-        console.log('✅ Reconocimiento de voz listo para CyberPet (es-MX)');
+        console.log('✅ Reconocimiento de voz listo (es-MX)');
     }
     
     toggleMicrophone() {
@@ -160,12 +150,9 @@ class CyberPetVoice {
         this.changeButtonImage('listening');
         this.button.classList.add('active');
         this.button.style.animation = 'pulse 0.5s infinite';
-        this.button.title = 'CyberPet escuchando - Toca para desactivar';
+        this.button.title = 'Alexa escuchando - Toca para desactivar';
         
-        // Mostrar indicador
-        this.showStatusIndicator('Di "CyberPet"', false);
-        
-        console.log('🚀 CyberPet ACTIVADO');
+        console.log('🚀 Alexa ACTIVADA');
         
         // Iniciar escucha
         setTimeout(() => {
@@ -180,7 +167,7 @@ class CyberPetVoice {
         this.changeButtonImage('inactive');
         this.button.classList.remove('active');
         this.button.style.animation = 'pulse 2s infinite';
-        this.button.title = 'Modo CyberPet - Asistente por voz';
+        this.button.title = 'Modo Alexa - Asistente por voz';
         
         // Detener reconocimiento
         if (this.recognition) {
@@ -191,10 +178,7 @@ class CyberPetVoice {
             }
         }
         
-        // Ocultar indicador
-        this.hideStatusIndicator();
-        
-        console.log('⏸️ CyberPet DESACTIVADO');
+        console.log('⏸️ Alexa DESACTIVADA');
         
         // Restaurar boca
         this.animateMouth('normal');
@@ -206,7 +190,7 @@ class CyberPetVoice {
         }
         
         try {
-            console.log('▶️ CyberPet escuchando...');
+            console.log('▶️ Iniciando escucha...');
             this.recognition.start();
         } catch (error) {
             console.error('❌ Error al iniciar:', error);
@@ -218,26 +202,13 @@ class CyberPetVoice {
         }
     }
     
-    extractCommand(transcript) {
-        // Buscar la palabra "cyberpet" o variantes
-        const wakeWordPattern = /(cyberpet|cyber pet|sa[iíí]berpet)/i;
-        const match = transcript.match(wakeWordPattern);
-        
-        if (match) {
-            // Extraer todo después de la palabra de activación
-            const startIndex = transcript.indexOf(match[0].toLowerCase());
-            const command = transcript.substring(startIndex + match[0].length).trim();
-            return command.replace(/[.,!?]/g, '').trim();
-        }
-        
-        return '';
-    }
-    
     processCommand(transcript) {
-        // Extraer comando después de "cyberpet"
-        const command = this.extractCommand(transcript);
+        // Extraer comando después de "alexa"
+        const alexaIndex = transcript.indexOf(this.wakeWord);
+        let command = transcript.substring(alexaIndex + this.wakeWord.length).trim();
+        command = command.replace(/[.,!?]/g, '').trim();
         
-        console.log('📝 Comando CyberPet:', command);
+        console.log('📝 Comando:', command);
         
         // Comandos para detener
         if (this.isStopCommand(command)) {
@@ -247,7 +218,7 @@ class CyberPetVoice {
             return;
         }
         
-        // Si solo dijo "cyberpet"
+        // Si solo dijo "alexa"
         if (!command) {
             this.speak("¿Sí? ¿En qué puedo ayudarte?");
             return;
@@ -258,19 +229,16 @@ class CyberPetVoice {
     }
     
     isStopCommand(command) {
-        const stopWords = ['para', 'detente', 'cállate', 'callate', 'silencio', 'basta', 'alto', 'detente'];
+        const stopWords = ['para', 'detente', 'cállate', 'callate', 'silencio', 'basta', 'alto'];
         return stopWords.some(word => command.includes(word));
     }
     
     findResponse(query) {
-        console.log('🔍 CyberPet buscando respuesta para:', query);
+        console.log('🔍 Buscando respuesta para:', query);
         
         // Cambiar botón a modo pensando (IMAGEN)
         this.changeButtonImage('thinking');
         this.button.style.animation = 'none';
-        
-        // Mostrar que está procesando
-        this.showStatusIndicator('🤔 Procesando...', false);
         
         // 1. Buscar en respuestas predefinidas (si existen)
         if (typeof getPredefinedResponse === 'function') {
@@ -285,13 +253,13 @@ class CyberPetVoice {
         
         // 2. Buscar en Wikipedia (si existe la función)
         if (typeof searchWeb === 'function') {
-            console.log('🌐 CyberPet buscando en web...');
+            console.log('🌐 Buscando en web...');
             this.searchWebAndSpeak(query);
             return;
         }
         
         // 3. Respuesta por defecto
-        this.speak(`Entendí "${query}", pero aún estoy aprendiendo. Pregúntame algo más.`);
+        this.speak(`Entendí "${query}", pero aún estoy aprendiendo.`);
     }
     
     searchWebAndSpeak(query) {
@@ -342,7 +310,7 @@ class CyberPetVoice {
             
         } catch (error) {
             window.addMessage = originalAddMessage;
-            this.speak("Hubo un error al buscar. Intenta de nuevo.");
+            this.speak("Hubo un error al buscar.");
         }
     }
     
@@ -352,7 +320,7 @@ class CyberPetVoice {
     }
     
     speak(text) {
-        console.log('🗣️ CyberPet hablando:', text.substring(0, 50) + '...');
+        console.log('🗣️ Hablando:', text.substring(0, 50) + '...');
         
         if (!window.speechSynthesis) {
             console.error('❌ No puede hablar');
@@ -365,9 +333,6 @@ class CyberPetVoice {
         this.changeButtonImage('speaking');
         this.button.classList.add('speaking');
         this.button.style.animation = 'pulse 0.3s infinite';
-        
-        // Mostrar que está hablando
-        this.showStatusIndicator('🗣️ Hablando...', false);
         
         // Animar boca
         this.animateMouth('speaking');
@@ -399,18 +364,18 @@ class CyberPetVoice {
             
             if (mexicanVoice) {
                 utterance.voice = mexicanVoice;
-                console.log('✅ CyberPet usando voz mexicana:', mexicanVoice.name);
+                console.log('✅ Usando voz mexicana:', mexicanVoice.name);
             }
         }, 100);
         
         // Cuando empieza a hablar
         utterance.onstart = () => {
-            console.log('▶️ CyberPet empezó a hablar');
+            console.log('▶️ Empezó a hablar (es-MX)');
         };
         
         // Cuando termina de hablar
         utterance.onend = () => {
-            console.log('✅ CyberPet terminó de hablar');
+            console.log('✅ Terminó de hablar');
             this.finishSpeaking();
         };
         
@@ -431,7 +396,7 @@ class CyberPetVoice {
         this.isSpeaking = false;
         this.stopMouthAnimation();
         
-        // Si CyberPet sigue activo, volver a escuchar
+        // Si Alexa sigue activa, volver a escuchar
         if (this.isActive) {
             this.resetToListening();
         } else {
@@ -449,19 +414,14 @@ class CyberPetVoice {
         this.isSpeaking = false;
         this.stopMouthAnimation();
         
-        console.log('⏹️ CyberPet detuvo habla');
+        console.log('⏹️ Habla detenida');
         
-        // Mostrar mensaje de detenido
-        this.showStatusIndicator('🛑 Detenido', false, true);
-        
-        setTimeout(() => {
-            // Si CyberPet sigue activo, volver a escuchar
-            if (this.isActive) {
-                this.resetToListening();
-            } else {
-                this.resetButton();
-            }
-        }, 1500);
+        // Si Alexa sigue activa, volver a escuchar
+        if (this.isActive) {
+            this.resetToListening();
+        } else {
+            this.resetButton();
+        }
     }
     
     resetToListening() {
@@ -470,9 +430,6 @@ class CyberPetVoice {
         this.button.classList.remove('speaking');
         this.button.classList.add('active');
         this.button.style.animation = 'pulse 0.5s infinite';
-        
-        // Mostrar indicador
-        this.showStatusIndicator('Di "CyberPet"', false);
         
         this.animateMouth('listening');
         
@@ -489,10 +446,7 @@ class CyberPetVoice {
         this.changeButtonImage('inactive');
         this.button.classList.remove('active', 'speaking');
         this.button.style.animation = 'pulse 2s infinite';
-        this.button.title = 'Modo CyberPet - Asistente por voz';
-        
-        // Ocultar indicador
-        this.hideStatusIndicator();
+        this.button.title = 'Modo Alexa - Asistente por voz';
         
         this.animateMouth('normal');
     }
@@ -536,62 +490,6 @@ class CyberPetVoice {
         }
     }
     
-    showStatusIndicator(text, isListening = false, isError = false) {
-        // Usar el contenedor existente o crear uno nuevo
-        let container = document.getElementById('alexaStatusContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'alexaStatusContainer';
-            container.style.cssText = `
-                margin: 10px 0;
-                padding: 8px;
-                border-radius: 8px;
-                background: rgba(0, 0, 0, 0.3);
-                border: 1px solid var(--main-color, #0ff);
-            `;
-            
-            const statsPanel = document.getElementById('statsPanel');
-            if (statsPanel) {
-                statsPanel.appendChild(container);
-            }
-        }
-        
-        let indicator = document.getElementById('cyberpetStatus');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'cyberpetStatus';
-            indicator.className = 'cyberpet-status';
-            indicator.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                font-family: 'Orbitron', sans-serif;
-                font-size: 14px;
-            `;
-            container.appendChild(indicator);
-        }
-        
-        // Crear pulso visual
-        let pulse = '';
-        if (isListening) {
-            pulse = `<div style="width: 10px; height: 10px; background: #0ff; border-radius: 50%; animation: pulse 1s infinite;"></div>`;
-        } else if (isError) {
-            pulse = `<div style="width: 10px; height: 10px; background: #f00; border-radius: 50%;"></div>`;
-        } else {
-            pulse = `<div style="width: 10px; height: 10px; background: #0f0; border-radius: 50%;"></div>`;
-        }
-        
-        indicator.innerHTML = pulse + `<span style="color: ${isError ? '#f00' : '#fff'}">${text}</span>`;
-        container.style.display = 'block';
-    }
-    
-    hideStatusIndicator() {
-        const container = document.getElementById('alexaStatusContainer');
-        if (container) {
-            container.style.display = 'none';
-        }
-    }
-    
     showMessage(text) {
         // Mostrar mensaje temporal
         const container = document.getElementById('alexaStatusContainer');
@@ -608,13 +506,13 @@ class CyberPetVoice {
 
 // Inicializar cuando cargue la página
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Página cargada - Iniciando CyberPet Voice');
+    console.log('🚀 Página cargada - Iniciando Alexa Button Final');
     
     // Esperar a que carguen todas las imágenes
     setTimeout(() => {
         try {
-            window.cyberPetVoice = new CyberPetVoice();
-            console.log('✅ CyberPet Voice listo para usar');
+            window.alexaButton = new AlexaButton();
+            console.log('✅ Alexa Button Final listo para usar');
             
             // Verificar que las imágenes existan
             const img = document.querySelector('#alexaBtn img');
@@ -623,15 +521,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🤖</text></svg>';
             }
         } catch (error) {
-            console.error('❌ Error iniciando CyberPet:', error);
+            console.error('❌ Error iniciando Alexa:', error);
             
             // Fallback simple con emoji
             const btn = document.getElementById('alexaBtn');
             if (btn) {
                 btn.innerHTML = '🤖';
-                btn.title = 'CyberPet - Asistente por voz';
                 btn.onclick = () => {
-                    alert('CyberPet no está disponible.\nPrueba actualizando tu navegador.');
+                    alert('Alexa no está disponible.\nPrueba actualizando tu navegador.');
                 };
             }
         }
@@ -639,9 +536,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Estilos para el botón con imágenes
-if (!document.querySelector('#cyberpet-voice-styles')) {
+if (!document.querySelector('#alexa-button-final-styles')) {
     const style = document.createElement('style');
-    style.id = 'cyberpet-voice-styles';
+    style.id = 'alexa-button-final-styles';
     style.textContent = `
         /* Animaciones básicas */
         @keyframes pulse {
@@ -668,12 +565,6 @@ if (!document.querySelector('#cyberpet-voice-styles')) {
             100% { box-shadow: 0 0 5px #00cc66; }
         }
         
-        @keyframes glow-blue {
-            0% { box-shadow: 0 0 5px #0ff; }
-            50% { box-shadow: 0 0 15px #0ff; }
-            100% { box-shadow: 0 0 5px #0ff; }
-        }
-        
         /* Estados del botón CON IMÁGENES */
         #alexaBtn {
             transition: all 0.3s;
@@ -691,23 +582,18 @@ if (!document.querySelector('#cyberpet-voice-styles')) {
         #alexaBtn img {
             display: block;
             transition: transform 0.3s;
-            filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.5));
         }
         
         #alexaBtn.active {
             background: rgba(255, 51, 102, 0.2) !important;
             border-color: #ff3366 !important;
-            animation: pulse-fast 0.5s infinite, glow-red 1.5s infinite !important;
+            animation: pulse-fast 0.5s infinite, glow-red 1s infinite !important;
         }
         
         #alexaBtn.speaking {
             background: rgba(0, 204, 102, 0.2) !important;
             border-color: #00cc66 !important;
-            animation: pulse-fast 0.3s infinite, glow-green 1.5s infinite !important;
-        }
-        
-        #alexaBtn:hover {
-            animation: glow-blue 2s infinite !important;
+            animation: pulse-fast 0.3s infinite, glow-green 1s infinite !important;
         }
         
         #alexaBtn:hover img {
@@ -716,11 +602,6 @@ if (!document.querySelector('#cyberpet-voice-styles')) {
         
         #alexaBtn:active {
             transform: scale(0.95);
-        }
-        
-        /* Indicador de estado */
-        #alexaStatusContainer {
-            transition: all 0.3s;
         }
         
         /* Para móviles */
@@ -734,12 +615,6 @@ if (!document.querySelector('#cyberpet-voice-styles')) {
             #alexaBtn img {
                 width: 36px !important;
                 height: 36px !important;
-            }
-            
-            #alexaStatusContainer {
-                font-size: 12px !important;
-                padding: 6px !important;
-                margin: 5px 0 !important;
             }
         }
         
@@ -755,53 +630,29 @@ if (!document.querySelector('#cyberpet-voice-styles')) {
                 width: 30px !important;
                 height: 30px !important;
             }
-            
-            #alexaStatusContainer {
-                font-size: 11px !important;
-                padding: 4px !important;
-            }
         }
     `;
     document.head.appendChild(style);
 }
 
-// Script para precargar imágenes
-function preloadCyberPetImages() {
+// Script para precargar imágenes (opcional)
+function preloadAlexaImages() {
     const images = [
-        'img/robot.png',
-        'img/microfono.png', 
-        'img/globo-de-chat.png',
-        'img/idea.png'
+        'img/alexa-off.png',
+        'img/alexa-on.png', 
+        'img/alexa-speak.png',
+        'img/alexa-think.png'
     ];
     
     images.forEach(src => {
         const img = new Image();
         img.src = src;
-        img.onerror = () => {
-            console.warn(`⚠️ No se pudo cargar imagen: ${src}`);
-        };
     });
 }
 
 // Precargar imágenes cuando sea posible
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', preloadCyberPetImages);
+    document.addEventListener('DOMContentLoaded', preloadAlexaImages);
 } else {
-    preloadCyberPetImages();
+    preloadAlexaImages();
 }
-
-// Actualizar cualquier texto que diga "Alexa" a "CyberPet" en la UI
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        // Actualizar textos en el botón
-        const alexaBtn = document.getElementById('alexaBtn');
-        if (alexaBtn && !alexaBtn.querySelector('img')) {
-            alexaBtn.title = 'Modo CyberPet - Asistente por voz';
-        }
-        
-        // Actualizar título de la página si es necesario
-        if (document.title.includes('Alexa')) {
-            document.title = document.title.replace('Alexa', 'CyberPet');
-        }
-    }, 2000);
-});
