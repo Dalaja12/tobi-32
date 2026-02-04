@@ -1,18 +1,18 @@
-// Alexa Botón Final - Con imágenes y voz mexicana
-class AlexaButton {
+// Oye Voice Final - Asistente por voz simple
+class OyeVoice {
     constructor() {
         this.isActive = false;
         this.isSpeaking = false;
         this.recognition = null;
-        this.wakeWord = "alexa";
+        this.wakeWord = "oye"; // PALABRA CLAVE SIMPLE
         this.button = document.getElementById('alexaBtn');
         
         // Imágenes para los estados del botón
         this.buttonImages = {
-            inactive: 'img/alexa-off.png',    // 🤖 (desactivado)
-            listening: 'img/alexa-on.png',    // 🎤 (escuchando)
-            speaking: 'img/alexa-speak.png',  // 🗣️ (hablando)
-            thinking: 'img/alexa-think.png'   // 🤔 (pensando)
+            inactive: 'img/alexa-off.png',
+            listening: 'img/alexa-on.png',
+            speaking: 'img/alexa-speak.png',
+            thinking: 'img/alexa-think.png'
         };
         
         // Inicializar
@@ -20,23 +20,22 @@ class AlexaButton {
     }
     
     initialize() {
-        console.log('🎯 Alexa Botón Final inicializando...');
+        console.log('🎯 Oye Voice inicializando...');
         
-        // Configurar el botón con imagen inicial
+        // Configurar el botón
         if (this.button) {
-            // Reemplazar emoji por imagen
             this.button.innerHTML = '';
             const img = document.createElement('img');
             img.src = this.buttonImages.inactive;
-            img.alt = 'Alexa';
+            img.alt = 'Oye';
             img.style.width = '32px';
             img.style.height = '32px';
             this.button.appendChild(img);
             
             this.button.addEventListener('click', () => this.toggleMicrophone());
-            console.log('✅ Botón configurado con imágenes');
+            console.log('✅ Botón configurado');
         } else {
-            console.error('❌ Botón Alexa no encontrado');
+            console.error('❌ Botón no encontrado');
             return;
         }
         
@@ -48,63 +47,59 @@ class AlexaButton {
     }
     
     setupVoiceRecognition() {
-        // Verificar si el navegador soporta reconocimiento de voz
         if (!('webkitSpeechRecognition' in window)) {
             console.warn('⚠️ Navegador no soporta voz');
             this.button.onclick = () => {
-                alert('Tu navegador no soporta reconocimiento de voz.\nUsa Chrome o Edge en tu móvil.');
+                alert('Tu navegador no soporta reconocimiento de voz.\nUsa Chrome o Edge.');
             };
             return;
         }
         
         // Crear reconocimiento
         this.recognition = new webkitSpeechRecognition();
-        this.recognition.lang = 'es-MX'; // VOZ MEXICANA
-        this.recognition.continuous = false; // Solo una vez por comando
+        this.recognition.lang = 'es-MX';
+        this.recognition.continuous = false;
         this.recognition.interimResults = false;
         this.recognition.maxAlternatives = 1;
         
-        // Cuando empieza a escuchar
+        // Eventos
         this.recognition.onstart = () => {
             console.log('🎤 Micrófono ACTIVADO');
             this.animateMouth('listening');
         };
         
-        // Cuando recibe resultado
         this.recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
             console.log('👂 Escuché:', transcript);
             
-            // Buscar "alexa" en lo que dijo
-            if (transcript.includes(this.wakeWord)) {
-                console.log('✅ "Alexa" detectada');
+            // Buscar "oye" (acepta variaciones)
+            const hasWakeWord = transcript.includes('oye') || 
+                               transcript.includes('oí') ||
+                               transcript.includes('oi') ||
+                               transcript.includes('oy');
+            
+            if (hasWakeWord) {
+                console.log('✅ "Oye" detectado');
                 this.processCommand(transcript);
             } else {
-                // Si no dijo "alexa", ignorar
-                console.log('❌ No dijo "Alexa"');
+                console.log('❌ No dijo "Oye"');
                 this.resetToListening();
             }
         };
         
-        // Si hay error
         this.recognition.onerror = (event) => {
             console.log('⚠️ Error micrófono:', event.error);
             
             if (event.error === 'not-allowed') {
                 this.showMessage('🎤 Permitir micrófono');
-                setTimeout(() => {
-                    alert('Por favor, permite el acceso al micrófono para usar Alexa.');
-                }, 500);
             }
             
             this.resetButton();
         };
         
-        // Cuando termina de escuchar
         this.recognition.onend = () => {
             console.log('🔇 Micrófono DESACTIVADO');
             
-            // Solo reiniciar si sigue activo y no está hablando
             if (this.isActive && !this.isSpeaking) {
                 setTimeout(() => {
                     if (this.isActive && !this.isSpeaking) {
@@ -114,23 +109,20 @@ class AlexaButton {
             }
         };
         
-        console.log('✅ Reconocimiento de voz listo (es-MX)');
+        console.log('✅ Reconocimiento listo');
     }
     
     toggleMicrophone() {
-        console.log('🔄 Botón presionado - Estado actual:', this.isActive);
+        console.log('🔄 Botón presionado');
         
         if (this.isSpeaking) {
-            // Si está hablando, detenerlo
             this.stopSpeaking();
             return;
         }
         
         if (!this.isActive) {
-            // ACTIVAR micrófono
             this.activateMicrophone();
         } else {
-            // DESACTIVAR micrófono
             this.deactivateMicrophone();
         }
     }
@@ -146,15 +138,17 @@ class AlexaButton {
     activateMicrophone() {
         this.isActive = true;
         
-        // Cambiar botón a modo escucha (IMAGEN)
+        // Cambiar botón SIN SONIDO
         this.changeButtonImage('listening');
         this.button.classList.add('active');
         this.button.style.animation = 'pulse 0.5s infinite';
-        this.button.title = 'Alexa escuchando - Toca para desactivar';
         
-        console.log('🚀 Alexa ACTIVADA');
+        // Mostrar indicador SIN SONIDO
+        this.showStatusIndicator('Di "Oye"', false);
         
-        // Iniciar escucha
+        console.log('🚀 Oye ACTIVADO');
+        
+        // Iniciar escucha SIN SONIDO
         setTimeout(() => {
             this.startListening();
         }, 300);
@@ -163,13 +157,12 @@ class AlexaButton {
     deactivateMicrophone() {
         this.isActive = false;
         
-        // Cambiar botón a modo inactivo (IMAGEN)
+        // Cambiar botón SIN SONIDO
         this.changeButtonImage('inactive');
         this.button.classList.remove('active');
         this.button.style.animation = 'pulse 2s infinite';
-        this.button.title = 'Modo Alexa - Asistente por voz';
         
-        // Detener reconocimiento
+        // Detener SIN SONIDO
         if (this.recognition) {
             try {
                 this.recognition.stop();
@@ -178,9 +171,10 @@ class AlexaButton {
             }
         }
         
-        console.log('⏸️ Alexa DESACTIVADA');
+        this.hideStatusIndicator();
         
-        // Restaurar boca
+        console.log('⏸️ Oye DESACTIVADO');
+        
         this.animateMouth('normal');
     }
     
@@ -190,27 +184,44 @@ class AlexaButton {
         }
         
         try {
-            console.log('▶️ Iniciando escucha...');
+            console.log('▶️ Escuchando...');
             this.recognition.start();
         } catch (error) {
             console.error('❌ Error al iniciar:', error);
             
-            // Reintentar en 2 segundos
             if (this.isActive) {
                 setTimeout(() => this.startListening(), 2000);
             }
         }
     }
     
+    extractCommand(transcript) {
+        // Buscar "oye" y extraer lo que sigue
+        const wakeWordPattern = /(oye|o[iíí]|oy)/i;
+        const match = transcript.match(wakeWordPattern);
+        
+        if (match) {
+            const startIndex = transcript.indexOf(match[0].toLowerCase());
+            const command = transcript.substring(startIndex + match[0].length).trim();
+            // MANTENER NÚMEROS, SÍMBOLOS, PORCENTAJES - SOLO QUITAR EMOJIS
+            return this.cleanText(command);
+        }
+        
+        return '';
+    }
+    
+    cleanText(text) {
+        // SOLO QUITAR EMOJIS - MANTENER TODO LO DEMÁS
+        // Esto mantiene números (123), símbolos (%, $, +, -), letras, espacios
+        return text.replace(/[\p{Emoji}]/gu, '').trim();
+    }
+    
     processCommand(transcript) {
-        // Extraer comando después de "alexa"
-        const alexaIndex = transcript.indexOf(this.wakeWord);
-        let command = transcript.substring(alexaIndex + this.wakeWord.length).trim();
-        command = command.replace(/[.,!?]/g, '').trim();
+        const command = this.extractCommand(transcript);
         
         console.log('📝 Comando:', command);
         
-        // Comandos para detener
+        // Comandos para detener (SIN SONIDO)
         if (this.isStopCommand(command)) {
             console.log('🛑 Comando DETENER');
             this.stopSpeaking();
@@ -218,13 +229,11 @@ class AlexaButton {
             return;
         }
         
-        // Si solo dijo "alexa"
         if (!command) {
             this.speak("¿Sí? ¿En qué puedo ayudarte?");
             return;
         }
         
-        // Buscar respuesta
         this.findResponse(command);
     }
     
@@ -236,44 +245,44 @@ class AlexaButton {
     findResponse(query) {
         console.log('🔍 Buscando respuesta para:', query);
         
-        // Cambiar botón a modo pensando (IMAGEN)
         this.changeButtonImage('thinking');
         this.button.style.animation = 'none';
         
-        // 1. Buscar en respuestas predefinidas (si existen)
+        this.showStatusIndicator('🤔 Procesando...', false);
+        
+        // 1. Buscar en respuestas predefinidas
         if (typeof getPredefinedResponse === 'function') {
             const response = getPredefinedResponse(query);
             if (response) {
                 console.log('✅ Respuesta predefinida encontrada');
                 const responseText = typeof response === 'object' ? response.text : response;
-                this.speak(responseText);
+                // LIMPIAR SOLO EMOJIS - MANTENER NÚMEROS Y SÍMBOLOS
+                const cleanText = this.cleanText(responseText);
+                this.speak(cleanText);
                 return;
             }
         }
         
-        // 2. Buscar en Wikipedia (si existe la función)
+        // 2. Buscar en Wikipedia
         if (typeof searchWeb === 'function') {
             console.log('🌐 Buscando en web...');
             this.searchWebAndSpeak(query);
             return;
         }
         
-        // 3. Respuesta por defecto
-        this.speak(`Entendí "${query}", pero aún estoy aprendiendo.`);
+        // 3. Respuesta por defecto (CON NÚMEROS Y SÍMBOLOS SI LOS TIENE)
+        this.speak(`Entendí "${query}", ¿qué más quieres saber?`);
     }
     
     searchWebAndSpeak(query) {
-        // Guardar función original
         const originalAddMessage = window.addMessage;
         let responseCaptured = false;
         
-        // Interceptar mensajes
         window.addMessage = (text, sender) => {
             if (sender === 'bot' && !responseCaptured) {
-                // LIMPIAR EMOJIS - NO LEER EMOJIS
-                const cleanText = this.removeEmojis(text);
+                // LIMPIAR SOLO EMOJIS - MANTENER NÚMEROS, %, SÍMBOLOS
+                const cleanText = this.cleanText(text);
                 
-                // Filtrar mensajes del sistema
                 if (cleanText.length > 20 && 
                     !cleanText.includes('Buscando') && 
                     !cleanText.includes('Cargando') &&
@@ -282,25 +291,21 @@ class AlexaButton {
                     responseCaptured = true;
                     console.log('✅ Respuesta web encontrada');
                     
-                    // Hablar la respuesta SIN EMOJIS
+                    // Hablar manteniendo números y símbolos
                     this.speak(cleanText);
                     
-                    // Restaurar función original
                     window.addMessage = originalAddMessage;
                 }
             }
             
-            // Pasar a original si existe
             if (originalAddMessage && !responseCaptured) {
                 originalAddMessage(text, sender);
             }
         };
         
-        // Ejecutar búsqueda
         try {
             searchWeb(query);
             
-            // Timeout por si no responde
             setTimeout(() => {
                 if (!responseCaptured) {
                     window.addMessage = originalAddMessage;
@@ -314,9 +319,10 @@ class AlexaButton {
         }
     }
     
-    removeEmojis(str) {
-        // REMOVER TODOS LOS EMOJIS
-        return str.replace(/[\p{Emoji}]/gu, '').replace(/\s+/g, ' ').trim();
+    removeOnlyEmojis(str) {
+        // SOLO REMOVER EMOJIS - MANTENER TODO LO DEMÁS
+        // Esto mantiene: números 0-9, símbolos !@#$%^&*()_+-=, letras, espacios
+        return str.replace(/[\p{Emoji}]/gu, '').trim();
     }
     
     speak(text) {
@@ -328,34 +334,33 @@ class AlexaButton {
             return;
         }
         
-        // Cambiar estados
         this.isSpeaking = true;
         this.changeButtonImage('speaking');
         this.button.classList.add('speaking');
         this.button.style.animation = 'pulse 0.3s infinite';
         
-        // Animar boca
+        this.showStatusIndicator('🗣️ Hablando...', false);
+        
         this.animateMouth('speaking');
         this.startMouthAnimation();
         
-        // Detener micrófono mientras habla
+        // Detener micrófono SIN SONIDO
         if (this.recognition) {
             try {
                 this.recognition.stop();
             } catch (e) {}
         }
         
-        // Asegurar que el texto NO tenga emojis
-        const cleanText = this.removeEmojis(text);
+        // MANTENER NÚMEROS, %, SÍMBOLOS - SOLO QUITAR EMOJIS
+        const cleanText = this.removeOnlyEmojis(text);
         
-        // Crear habla con voz mexicana
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'es-MX'; // VOZ MEXICANA
+        utterance.lang = 'es-MX';
         utterance.rate = 0.85;
         utterance.pitch = 0.9;
         utterance.volume = 1.0;
         
-        // Intentar seleccionar voz mexicana si está disponible
+        // Buscar voz mexicana
         setTimeout(() => {
             const voices = window.speechSynthesis.getVoices();
             const mexicanVoice = voices.find(voice => 
@@ -364,49 +369,42 @@ class AlexaButton {
             
             if (mexicanVoice) {
                 utterance.voice = mexicanVoice;
-                console.log('✅ Usando voz mexicana:', mexicanVoice.name);
             }
         }, 100);
         
-        // Cuando empieza a hablar
         utterance.onstart = () => {
-            console.log('▶️ Empezó a hablar (es-MX)');
+            console.log('▶️ Empezó a hablar');
         };
         
-        // Cuando termina de hablar
         utterance.onend = () => {
             console.log('✅ Terminó de hablar');
             this.finishSpeaking();
         };
         
-        // Si hay error
         utterance.onerror = (event) => {
             console.error('❌ Error al hablar:', event);
             this.finishSpeaking();
         };
         
-        // Hablar con pequeño delay
+        // SIN SONIDO DE BEEP
         setTimeout(() => {
             window.speechSynthesis.speak(utterance);
         }, 200);
     }
     
     finishSpeaking() {
-        // Terminar habla
         this.isSpeaking = false;
         this.stopMouthAnimation();
         
-        // Si Alexa sigue activa, volver a escuchar
         if (this.isActive) {
             this.resetToListening();
         } else {
-            // Si no está activa, resetear botón
             this.resetButton();
         }
     }
     
     stopSpeaking() {
-        // Detener habla si está hablando
+        // Detener habla SIN SONIDO
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
         }
@@ -416,24 +414,29 @@ class AlexaButton {
         
         console.log('⏹️ Habla detenida');
         
-        // Si Alexa sigue activa, volver a escuchar
-        if (this.isActive) {
-            this.resetToListening();
-        } else {
-            this.resetButton();
-        }
+        // SIN SONIDO DE BEEP
+        this.showStatusIndicator('🛑 Detenido', false, true);
+        
+        setTimeout(() => {
+            if (this.isActive) {
+                this.resetToListening();
+            } else {
+                this.resetButton();
+            }
+        }, 1500);
     }
     
     resetToListening() {
-        // Volver a modo escucha (IMAGEN)
+        // Volver a escuchar SIN SONIDO
         this.changeButtonImage('listening');
         this.button.classList.remove('speaking');
         this.button.classList.add('active');
         this.button.style.animation = 'pulse 0.5s infinite';
         
+        this.showStatusIndicator('Di "Oye"', false);
+        
         this.animateMouth('listening');
         
-        // Reiniciar escucha después de un momento
         setTimeout(() => {
             if (this.isActive && !this.isSpeaking) {
                 this.startListening();
@@ -442,11 +445,11 @@ class AlexaButton {
     }
     
     resetButton() {
-        // Botón a estado normal (IMAGEN)
         this.changeButtonImage('inactive');
         this.button.classList.remove('active', 'speaking');
         this.button.style.animation = 'pulse 2s infinite';
-        this.button.title = 'Modo Alexa - Asistente por voz';
+        
+        this.hideStatusIndicator();
         
         this.animateMouth('normal');
     }
@@ -455,16 +458,14 @@ class AlexaButton {
         const mouth = document.getElementById('mouth');
         if (!mouth) return;
         
-        // Remover todas las clases de animación
         mouth.classList.remove('listening', 'speaking', 'happy', 'surprised');
         
-        // Añadir clase según estado
         if (state === 'listening') {
-            mouth.classList.add('surprised'); // Boca abierta para escuchar
+            mouth.classList.add('surprised');
         } else if (state === 'speaking') {
-            mouth.classList.add('happy'); // Boca normal para hablar
+            mouth.classList.add('happy');
         } else {
-            mouth.classList.add('happy'); // Boca normal
+            mouth.classList.add('happy');
         }
     }
     
@@ -472,7 +473,6 @@ class AlexaButton {
         const mouth = document.getElementById('mouth');
         if (!mouth) return;
         
-        // Animación de boca hablando
         this.mouthInterval = setInterval(() => {
             mouth.classList.toggle('surprised');
         }, 200);
@@ -490,8 +490,60 @@ class AlexaButton {
         }
     }
     
+    showStatusIndicator(text, isListening = false, isError = false) {
+        let container = document.getElementById('alexaStatusContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'alexaStatusContainer';
+            container.style.cssText = `
+                margin: 10px 0;
+                padding: 8px;
+                border-radius: 8px;
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--main-color, #0ff);
+            `;
+            
+            const statsPanel = document.getElementById('statsPanel');
+            if (statsPanel) {
+                statsPanel.appendChild(container);
+            }
+        }
+        
+        let indicator = document.getElementById('oyeStatus');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'oyeStatus';
+            indicator.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 14px;
+            `;
+            container.appendChild(indicator);
+        }
+        
+        let pulse = '';
+        if (isListening) {
+            pulse = `<div style="width: 10px; height: 10px; background: #0ff; border-radius: 50%; animation: pulse 1s infinite;"></div>`;
+        } else if (isError) {
+            pulse = `<div style="width: 10px; height: 10px; background: #f00; border-radius: 50%;"></div>`;
+        } else {
+            pulse = `<div style="width: 10px; height: 10px; background: #0f0; border-radius: 50%;"></div>`;
+        }
+        
+        indicator.innerHTML = pulse + `<span style="color: ${isError ? '#f00' : '#fff'}">${text}</span>`;
+        container.style.display = 'block';
+    }
+    
+    hideStatusIndicator() {
+        const container = document.getElementById('alexaStatusContainer');
+        if (container) {
+            container.style.display = 'none';
+        }
+    }
+    
     showMessage(text) {
-        // Mostrar mensaje temporal
         const container = document.getElementById('alexaStatusContainer');
         if (container) {
             container.innerHTML = `<div style="color: #0ff">${text}</div>`;
@@ -504,43 +556,41 @@ class AlexaButton {
     }
 }
 
-// Inicializar cuando cargue la página
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Página cargada - Iniciando Alexa Button Final');
+    console.log('🚀 Iniciando Oye Voice');
     
-    // Esperar a que carguen todas las imágenes
     setTimeout(() => {
         try {
-            window.alexaButton = new AlexaButton();
-            console.log('✅ Alexa Button Final listo para usar');
+            window.oyeVoice = new OyeVoice();
+            console.log('✅ Oye Voice listo');
             
-            // Verificar que las imágenes existan
+            // Verificar imágenes
             const img = document.querySelector('#alexaBtn img');
             if (img && img.naturalWidth === 0) {
-                console.warn('⚠️ Imagen no cargada, usando emoji de respaldo');
-                img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🤖</text></svg>';
+                console.warn('⚠️ Imagen no cargada');
+                img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🎤</text></svg>';
             }
         } catch (error) {
-            console.error('❌ Error iniciando Alexa:', error);
+            console.error('❌ Error:', error);
             
-            // Fallback simple con emoji
             const btn = document.getElementById('alexaBtn');
             if (btn) {
-                btn.innerHTML = '🤖';
+                btn.innerHTML = '🎤';
                 btn.onclick = () => {
-                    alert('Alexa no está disponible.\nPrueba actualizando tu navegador.');
+                    alert('Asistente de voz no disponible.');
                 };
             }
         }
     }, 1500);
 });
 
-// Estilos para el botón con imágenes
-if (!document.querySelector('#alexa-button-final-styles')) {
+// Estilos SIN ANIMACIONES DE SONIDO
+if (!document.querySelector('#oye-voice-styles')) {
     const style = document.createElement('style');
-    style.id = 'alexa-button-final-styles';
+    style.id = 'oye-voice-styles';
     style.textContent = `
-        /* Animaciones básicas */
+        /* Animaciones visuales SIN SONIDO */
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.05); opacity: 0.8; }
@@ -555,21 +605,20 @@ if (!document.querySelector('#alexa-button-final-styles')) {
         
         @keyframes glow-red {
             0% { box-shadow: 0 0 5px #ff3366; }
-            50% { box-shadow: 0 0 20px #ff3366; }
+            50% { box-shadow: 0 0 15px #ff3366; }
             100% { box-shadow: 0 0 5px #ff3366; }
         }
         
         @keyframes glow-green {
             0% { box-shadow: 0 0 5px #00cc66; }
-            50% { box-shadow: 0 0 20px #00cc66; }
+            50% { box-shadow: 0 0 15px #00cc66; }
             100% { box-shadow: 0 0 5px #00cc66; }
         }
         
-        /* Estados del botón CON IMÁGENES */
+        /* Botón SIN SONIDO */
         #alexaBtn {
             transition: all 0.3s;
             cursor: pointer;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -582,6 +631,7 @@ if (!document.querySelector('#alexa-button-final-styles')) {
         #alexaBtn img {
             display: block;
             transition: transform 0.3s;
+            filter: drop-shadow(0 0 2px rgba(0, 255, 255, 0.3));
         }
         
         #alexaBtn.active {
@@ -617,26 +667,12 @@ if (!document.querySelector('#alexa-button-final-styles')) {
                 height: 36px !important;
             }
         }
-        
-        /* Para pantallas muy pequeñas */
-        @media (max-width: 480px) {
-            #alexaBtn {
-                min-width: 50px !important;
-                min-height: 50px !important;
-                padding: 6px;
-            }
-            
-            #alexaBtn img {
-                width: 30px !important;
-                height: 30px !important;
-            }
-        }
     `;
     document.head.appendChild(style);
 }
 
-// Script para precargar imágenes (opcional)
-function preloadAlexaImages() {
+// Precargar imágenes
+function preloadImages() {
     const images = [
         'img/alexa-off.png',
         'img/alexa-on.png', 
@@ -650,9 +686,10 @@ function preloadAlexaImages() {
     });
 }
 
-// Precargar imágenes cuando sea posible
+// Precargar
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', preloadAlexaImages);
+    document.addEventListener('DOMContentLoaded', preloadImages);
 } else {
-    preloadAlexaImages();
+    preloadImages();
 }
+
